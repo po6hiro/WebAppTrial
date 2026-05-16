@@ -3,114 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goal Rider Biz - V1.12</title>
-
-    <link rel="icon" href="https://img.icons8.com/clouds/256/delivery-man.png" type="image/png">
-    <link rel="apple-touch-icon" href="https://img.icons8.com/clouds/256/delivery-man.png">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#2c3e50">
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <title>当五郎</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; margin: 0; padding: 0; color: #333; height: 100vh; overflow: hidden; }
-        #appUI { display: flex; flex-direction: column; height: 100vh; width: 100%; }
-
-        .main-tabs { display: flex; background: #2c3e50; padding: 2px; gap: 2px; position: relative; z-index: 2000; flex-shrink: 0; }
-        .tab-btn { flex: 1; padding: 10px 8px; border: none; background: none; color: #bdc3c7; font-weight: bold; font-size: 0.85em; border-radius: 4px; cursor: pointer; }
-        .tab-btn.active { background: #34495e; color: white; }
-        .version-bar { background: #e0e0e0; color: #777; font-size: 0.6em; text-align: right; padding: 1px 10px; font-weight: bold; flex-shrink: 0; border-bottom: 1px solid #ccc; }
-
-        .content-area { flex: 1; overflow-y: auto; padding: 4px 6px; box-sizing: border-box; display: none; }
-        .content-area.active { display: block; }
-
-        .rider-selector { display: flex; background: #ddd; border-radius: 8px; padding: 2px; margin-bottom: 4px; }
-        .rider-btn { flex: 1; text-align: center; padding: 6px; border-radius: 6px; font-size: 0.8em; font-weight: bold; border: none; background: none; color: #666; }
-        .rider-active { background: #3498db; color: white; }
-
-        .btn-row { display: flex; gap: 4px; margin-bottom: 4px; align-items: center; }
-        button.view-btn { flex: 1; padding: 8px 4px; border-radius: 6px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: bold; font-size: 0.75em; }
-        .active-view { background: #3498db !important; border-color: #2980b9 !important; color: white !important; }
-
-        .card { background: white; border-radius: 8px; padding: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 6px; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; border-top: 1px solid #eee; padding-top: 4px; }
-        .stats-val { font-weight: 800; font-size: 0.95em; color: #2c3e50; line-height: 1.1; }
-        .stats-label { font-size: 0.6em; color: #777; }
-
-        .chart-container { height: 85px; position: relative; margin-bottom: 2px; }
-        .action-button-row { display: flex; gap: 6px; padding: 4px 0; }
-        .btn-main-entry { flex: 3; background: #2ecc71; color: white; border: none; padding: 12px; font-size: 1.0em; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .btn-analyze-trigger { flex: 1; background: #95a5a6; color: white; border: none; padding: 12px; font-size: 0.85em; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        .btn-modal-primary { width: 100%; background: #2ecc71; color: white; border: none; padding: 12px; font-size: 1.0em; border-radius: 10px; cursor: pointer; font-weight: bold; }
-
-        #map { width: 100%; height: 100%; z-index: 1; }
-        .map-ui { position: absolute; bottom: 85px; right: 15px; display: flex; flex-direction: column; gap: 10px; z-index: 1000; }
-        .ui-btn { width: 50px; height: 50px; border-radius: 25px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; font-size: 1.1em; cursor: pointer; }
+        :root { --blue: #01579b; --gold: #ffc107; --bg: #f0f2f5; --red: #d32f2f; --green: #2e7d32; --orange: #f57c00; --dark: #333; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; color: var(--dark); padding-bottom: 30px; }
+        .header { background: var(--blue); color: white; padding: 10px 15px; text-align: center; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .ver { position: absolute; top: 5px; right: 10px; font-size: 0.6rem; opacity: 0.7; }
+        .container { padding: 5px; max-width: 600px; margin: auto; }
         
-        .leaflet-tooltip-own { background: white; border: 1px solid #333; border-radius: 4px; padding: 4px 8px; font-size: 10px; font-weight: bold; white-space: normal; min-width: 180px; max-width: 280px; line-height: 1.3; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); }
+        .logic-wrap { margin: 10px 5px; }
+        .logic-btn-wide { width: 100%; background: white; color: var(--blue); border: 2px solid var(--blue); padding: 10px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .logic-desc { display: none; text-align: left; background: #fff; padding: 12px; border-radius: 8px; margin-top: 5px; font-size: 0.82rem; color: #444; border: 1px dashed var(--blue); line-height: 1.6; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        .tabs { display: flex; margin: 10px 5px; border-radius: 8px; overflow: hidden; border: 2px solid var(--blue); }
+        .tab { flex: 1; text-align: center; padding: 12px; background: white; color: var(--blue); font-weight: bold; cursor: pointer; font-size: 0.95rem; }
+        .tab.active { background: var(--blue); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .section-box { background: white; padding: 15px; border-radius: 10px; margin: 10px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .setting-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; }
+        .setting-select { padding: 8px; border-radius: 5px; border: 2px solid var(--gold); font-weight: bold; font-size: 0.85rem; }
+        .date-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin-bottom: 10px; }
+        .date-input { padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.9rem; width: 45%; text-align: center; }
+        
+        .btn { width: 100%; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; padding: 12px 0; }
+        .btn-pred { background: var(--gold); color: #333; box-shadow: 0 4px 0 #d4a017; }
+        .btn-verify { background: #eceff1; color: var(--blue); box-shadow: 0 4px 0 #cfd8dc; border: 1px solid #cfd8dc; }
+        
+        .stats-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.65rem; background: white; table-layout: fixed; }
+        .stats-table th, .stats-table td { border: 1px solid #e0e0e0; padding: 6px 1px; text-align: center; overflow: hidden; }
+        .stats-table th { background: #f5f5f5; height: 30px; }
+        .row-total { background: #e3f2fd; font-weight: bold; }
+        .val-plus { color: var(--red); font-weight: bold; }
+        .val-minus { color: var(--blue); }
 
-        .comment-ctrl-bar { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; gap: 4px; z-index: 1000; overflow-x: auto; background: rgba(255,255,255,0.9); padding: 5px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .ctrl-btn { white-space: nowrap; flex-shrink: 0; padding: 6px 10px; border-radius: 6px; border: 1px solid #ddd; background: white; font-size: 0.7em; font-weight: bold; color: #555; cursor: pointer; }
-        .ctrl-btn.active { background: #34495e; color: white; border-color: #2c3e50; }
-
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 3000; overflow-y: auto; }
-        .modal-content { background: white; margin: 2% auto; padding: 12px; width: 94%; border-radius: 15px; box-sizing: border-box; }
-        .compact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .input-group { margin-bottom: 8px; }
-        .input-group label { display: block; margin-bottom: 2px; font-weight: bold; font-size: 0.75em; color: #444; }
-        input, select, textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; font-size: 1em; }
-
-        .rule-btn { background: #f1c40f; border: none; color: #2c3e50; padding: 4px 10px; border-radius: 20px; font-size: 0.75em; font-weight: bold; cursor: pointer; }
-
-        .filter-tabs { display: flex; gap: 2px; margin-bottom: 8px; background: #eee; padding: 2px; border-radius: 8px; overflow-x: auto; }
-        .filter-btn { flex: 1; border: none; background: none; padding: 6px 4px; font-size: 0.65em; font-weight: bold; border-radius: 6px; color: #777; cursor: pointer; white-space: nowrap; }
-        .filter-btn.active { background: white; color: #2c3e50; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .filter-btn.alert { color: #e74c3c; }
-        .filter-btn.alert.active { background: #e74c3c; color: white; }
-
-        .kana-tabs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; margin-bottom: 12px; background: #f0f0f0; padding: 2px; border-radius: 8px; }
-        .kana-btn { border: none; background: white; padding: 4px 0; font-size: 0.65em; border-radius: 4px; color: #666; cursor: pointer; font-weight: bold; }
-        .kana-btn.active { background: #3498db; color: white; }
-
-        .list-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer; }
-        .list-info { flex: 1; }
-        .list-title { font-weight: bold; font-size: 0.9em; margin-bottom: 2px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-        .list-spot-name { color: #2c3e50; font-weight: 800; border-bottom: 1px solid #eee; margin-bottom: 2px; }
-        .cat-tag { font-size: 0.6em; padding: 1px 4px; border-radius: 4px; color: white; font-weight: normal; }
-        .tag-待機 { background: #9b59b6; }
-        .tag-ピック { background: #e67e22; }
-        .tag-ドロップ { background: #2980b9; }
-        .tag-休憩 { background: #27ae60; }
-
-        .weather-selector { display: flex; gap: 4px; margin-bottom: 12px; justify-content: space-between; }
-        .weather-btn { flex: 1; padding: 10px 0; border: 2px solid #eee; border-radius: 10px; background: white; cursor: pointer; font-size: 1.4em; display: flex; align-items: center; justify-content: center; filter: grayscale(100%); transition: all 0.2s; }
-        .weather-btn.active { filter: grayscale(0%); color: white; border-color: transparent; }
-        .weather-btn.active[data-w="大雨"] { background: #6c5ce7 !important; }
-        .weather-btn.active[data-w="雨"] { background: #0984e3 !important; }
-        .weather-btn.active[data-w="小雨"] { background: #00cec9 !important; }
-        .weather-btn.active[data-w="曇り"] { background: #636e72 !important; }
-        .weather-btn.active[data-w="晴れ"] { background: #f39c12 !important; }
-
-        /* 複数写真とコメント用スタイル */
-        .photo-add-btn { background: #3498db; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; font-size: 0.9em; cursor: pointer; width: 100%; box-sizing: border-box; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .spot-photo-item { display: flex; flex-direction: column; gap: 8px; background: white; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px; position: relative; }
-        .spot-photo-item img { width: 100%; border-radius: 6px; cursor: zoom-in; }
-        .spot-photo-comment { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #aaa; box-sizing: border-box; font-size: 0.9em; }
-        .remove-photo-btn { position: absolute; top: 15px; right: 15px; background: #e74c3c; color: white; border: none; width: 30px; height: 30px; border-radius: 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-
-        /* フルスクリーンズームビューワー */
-        #imageViewer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #000; z-index: 9999; overflow: auto; align-items: center; justify-content: center; }
-        .viewer-close { position: fixed; top: 20px; right: 20px; background: rgba(255,255,255,0.3); color: white; width: 40px; height: 40px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; cursor: pointer; z-index: 10000; }
+        .card { background: white; border-radius: 10px; padding: 10px; margin-bottom: 12px; border-left: 5px solid var(--blue); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .card-title { font-size: 1rem; font-weight: bold; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px solid #eee; }
+        .race-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .race-box { background: #f8f9fa; border: 1px solid #eee; padding: 6px 4px; border-radius: 6px; display: flex; flex-direction: column; }
+        .race-header { text-align: center; border-bottom: 1px dashed #ccc; margin-bottom: 5px; padding-bottom: 3px; }
+        .race-name { font-weight: bold; font-size: 0.75rem; display: block; }
+        .race-time { font-size: 0.65rem; color: #666; }
+        
+        .pred-item { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px; }
+        .pred-code { font-weight: bold; color: var(--red); font-size: 0.85rem; }
+        .pred-exp { font-size: 0.55rem; color: var(--blue); white-space: nowrap; }
+        
+        .hit-box { background: #e8f5e9; border: 1px dashed #4caf50; padding: 3px; margin-top: 4px; border-radius: 4px; text-align: center; color: var(--green); font-weight: bold; font-size: 0.7rem; }
+        .miss-box { background: #ffebee; border: 1px dashed #ef9a9a; padding: 3px; margin-top: 4px; border-radius: 4px; text-align: center; color: var(--red); font-size: 0.7rem; }
+        .result-code { font-weight: bold; display: block; font-size: 0.8rem; }
     </style>
 </head>
 <body>
+<div class="header">
+    <span class="ver">V1.00.10</span>
+    <h1 style="margin:0; font-size:1.4rem;">当五郎</h1>
+    <p style="margin:2px 0 0; font-size: 0.75rem; opacity: 0.9;">カテゴリ別 収支解析モデル</p>
+</div>
 
-    <div id="imageViewer">
-        <div class="viewer-close" onclick="closeImageViewer()">✕</div>
-        <img id="viewerImg" src="" style="max-width: 100%; height: auto; margin: auto; display: block;">
+<div class="container">
+    <div class="logic-wrap">
+        <button class="logic-btn-wide" onclick="toggleLogic()">💡 当五郎の予想ロジックを確認</button>
+        <div id="logicDesc" class="logic-desc">
+            <strong>【当五郎 3連率ベース総合判定】</strong><br>
+            ① 選手力：全国3連対率(80%) ＋ 当地3連対率(20%)<br>
+            ② モーター力：モーター3連対率<br>
+            ③ ベース値：選手力(60%) ＋ モーター力(40%)<br>
+            ④ 枠番補正（内枠ボーナス）：<br>
+            　1号艇：<strong>+15</strong> / 2号艇：<strong>+8</strong> / 3号艇：<strong>+4</strong><br>
+            　4号艇：<strong>±0</strong> / 5号艇：<strong>-4</strong> / 6号艇：<strong>-8</strong><br>
+            これらを総合計算し、期待値順に指定点数を抽出します。
+        </div>
     </div>
 
-    <div id="appUI">
-        <div class="main-tabs">
-            <button id="tabSales" class="tab-btn active" oncl
+    <div class="tabs">
+        <div class="tab active" onclick="switchTab('predict')">🚤 本日の予想</div>
+        <div class="tab" onclick="switchTab('backtest')">📊 バックテスト</div>
+    </div>
+
+    <div id="predict-section" class="tab-content active">
+        <div class="section-box">
+            <div class="setting-row">
+                <label>表示点数：</label>
+                <select id="predBetCount" class="setting-select">
+                    <option value="1">1点</option><option value="2">2点</option><option value="4" selected>4点</option><option value="8">8点</option><option value="12">12点</option>
+                </select>
+            </div>
+            <button class="btn btn-pred" onclick="runPrediction()">本日の予想を開始する</button>
+        </div>
+        <div id="s-pred" style="text-align:center; font-weight:bold; margin:15px; color:var(--blue);"></div>
+        <div id="area-pred"></div>
+    </div>
+
+    <div id="backtest-section" class="tab-content">
+        <div class="section-box">
+            <div class="date-row">
+                <input type="date" id="startDate" class="date-input"> 〜 <input type="date" id="endDate" class="date-input">
+            </div>
+            <div class="setting-row">
+                <label>詳細表示用：</label>
+                <select id="backtestViewCount" class="setting-select">
+                    <option value="1">1点</option><option value="2">2点</option><option value="4" selected>4点</option><option value="8">8点</option><option value="12">12点</option>
+                </select>
+            </div>
+            <button class="btn btn-verify" onclick="runBacktest()">全パターン一斉検証</button>
+        </div>
+        <div id="s-backtest" style="text-align:center; font-weight:bold; margin:15px; color:var(--blue);"></div>
+        
+        <div id="totalSummaryArea" style="display:none; margin: 0 5px;">
+            <div style="font-weight: bold; margin: 10px 0; font-size:0.85rem; border-left:4px solid var(--green); padding-left:5px;">📈 点数別 カテゴリ収支比較</div>
+            <table class="stats-table" id="matrixTable"></table>
+        </div>
+        <div id="area-backtest"></div>
+    </div>
+</div>
+
+<script>
+    const STADIUMS = {1:"桐生",2:"戸田",3:"江戸川",4:"平和島",5:"多摩川",6:"浜名湖",7:"蒲郡",8:"常滑",9:"津",10:"三国",11:"びわこ",12:"住之江",13:"尼崎",14:"鳴門",15:"丸亀",16:"児島",17:"宮島",18:"徳山",19:"下関",20:"若松",21:"芦屋",22:"福岡",23:"唐津",24:"大村"};
+    window.onload = () => { let d = new Date(); d.setDate(d.getDate() - 1); let yStr = d.toISOString().split('T')[0]; document.getElementById('startDate').value = yStr; document.getElementById('endDate').value = yStr; };
+    function toggleLogic() { let d = document.getElementById('logicDesc'); d.style.display = d.style.display === 'block' ? 'none' : 'block'; }
+    function switchTab(id) { document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); document.querySelector(`.tab[onclick="switchTab('${id}')"]`).classList.add('active'); document.getElementById(`${id}-section`).classList.add('active'); }
+    async function fetchJson(url) { try { let res = await fetch(url + "?t=" + new Date().getTime()); if (!res.ok) { let proxy = "https://api.allorigins.win/get?url=" + encodeURIComponent(url); let pRes = await fetch(proxy); let pData = await pRes.json(); return JSON.parse(pData.contents); } return await res.json(); } catch(e) { return null; } }
+
+    function calcScores(boats) {
+        return boats.map(x => {
+            let n = x.racer_boat_number;
+            let s = ((parseFloat(x.racer_national_top_3_percent||0)*0.8) + (parseFloat(x.racer_local_top_3_percent||0)*0.2)) * 0.6 + (parseFloat(x.racer_assigned_motor_top_3_percent||0)*0.4) + (n===1?15:n===2?8:n===3?4:n===4?0:n===5?-4:-8);
+            return { n: n, s: s };
+        }).sort((a,b) => b.s - a.s);
+    }
+
+    function generateBets(p, count) {
+        let all = [];
+        for(let i=0;i<p.length;i++) for(let j=0;j<p.length;j++) for(let k=0;k<p.length;k++) {
+            if(i===j||j===k||i===k) continue;
+            all.push({ code: `${p[i].n}-${p[j].n}-${p[k].n}`, prob: (p[i].s*0.5)+(p[j].s*0.3)+(p[k].s*0.2) });
+        }
+        return all.sort((a,b) => b.prob - a.prob).slice(0, count);
+    }
+
+    function renderRaceBox(race, stName, mark, betCount, resultBox = "") {
+        if(!race)
