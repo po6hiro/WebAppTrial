@@ -144,4 +144,111 @@
     }
 
     function renderRaceBox(race, stName, mark, betCount, resultBox = "") {
-        if(!race)
+        if(!race) return "";
+        let p = calcScores(race.boats||[]);
+        let bets = generateBets(p, betCount);
+        let time = race.race_closed_at ? race.race_closed_at.substring(11,16) : "--:--";
+        let bHtml = bets.map(b => `<div class="pred-item"><span class="pred-code">${b.code}</span><span class="pred-exp">期待度${b.prob.toFixed(1)}%</span></div>`).join("");
+        let rNum = race.race_number || race.number || race.raceNo || "?";
+        let label = stName ? `${stName} ${rNum}R` : `${rNum}R`;
+        return `<div class="race-box"><div class="race-header">${mark ? `<span style="font-weight:bold;color:var(--red);font-size:0.6rem;">${mark}</span>` : ""}<span class="race-name">${label}</span><span class="race-time">${time}締切</span></div>${bHtml}${resultBox}</div>`;
+    }
+
+    async function runPrediction() {
+        const area = document.getElementById('area-pred'); const status = document.getElementById('s-pred'); let betCount = parseInt(document.getElementById('predBetCount').value);
+        status.innerText = "🚀 読込中..."; area.innerHTML = ""; let data = await fetchJson("https://boatraceopenapi.github.io/programs/v2/today.json"); if(!data) { status.innerText = "⚠️ データ未公開"; return; }
+        let rank = data.programs.map(r => { let p = calcScores(r.boats||[]); return { key: r.race_stadium_number+"-"+r.race_number, prob: p.length? (p[0].s*0.5+p[1].s*0.3+p[2].s*0.2) : 0 }; }).sort((a,b) => b.prob - a.prob);
+        let html = ""; let geki = "", atsu = "";
+        rank.slice(0,3).forEach(rk => { let r = data.programs.find(x => x.race_stadium_number+"-"+x.race_number === rk.key); geki += renderRaceBox(r, STADIUMS[r.race_stadium_number], "激アツ🔥", betCount); });
+        rank.slice(3,8).forEach(rk => { let r = data.programs.find(x => x.race_stadium_number+"-"+x.race_number === rk.key); atsu += renderRaceBox(r, STADIUMS[r.race_stadium_number], "アツ🔥", betCount); });
+        if(geki) html += `<div class="card" style="border-left-color:var(--red);"><div class="card-title" style="color:var(--red);">🔥 激アツ レース一覧</div><div class="race-grid">${geki}</div></div>`;
+        if(atsu) html += `<div class="card" style="border-left-color:var(--orange);"><div class="card-title" style="color:var(--orange);">🔥 アツ レース一覧</div><div class="race-grid">${atsu}</div></div>`;
+        let venues = {}; data.programs.forEach(r => { let sId = r.race_stadium_number; if(!venues[sId]) venues[sId] = { id: sId, name: STADIUMS[sId]||sId, races: [] }; venues[sId].races.push(r); });
+        Object.keys(venues).sort((a,b)=>a-b).forEach(k => {
+            let g = ""; venues[k].races.sort((a,b)=>a.race_number-b.race_number).forEach(r => { g += renderRaceBox(r, "", "", betCount); });
+            html += `<div class="card"><div class="card-title" style="color:var(--blue);">${venues[k].name}</div><div class="race-grid">${g}</div></div>`;
+        });
+        area.innerHTML = html; status.innerText = "✅ 完了";
+    }
+
+    async function runBacktest() {
+        const area = document.getElementById('area-backtest'); const status = document.getElementById('s-backtest'); const sumArea = document.getElementById('totalSummaryArea'); const matrixTable = document.getElementById('matrixTable');
+        let viewCount = parseInt(document.getElementById('backtestViewCount').value);
+        let sDate = new Date(document.getElementById('startDate').value); let eDate = new Date(document.getElementById('endDate').value);
+        let diff = Math.ceil((eDate - sDate) / 86400000) + 1;
+        status.innerText = "🚀 検証中..."; area.innerHTML = ""; sumArea.style.display = "none";
+        
+        let matrix = { geki: {}, atsu: {}, other: {}, all: {} };
+        const counts = [1, 2, 4, 8, 12];
+        counts.forEach(c => { ["geki","atsu","other","all"].forEach(cat => matrix[cat][c] = { invest:0, ret:0 }); });
+
+        let fullHtml = ""; let cDate = new Date(sDate);
+        for(let i=0; i<diff; i++) {
+            let ymd = cDate.toISOString().split('T')[0].replace(/-/g,'');
+            let yyyy = cDate.getFullYear(); status.innerText = `🔄 ${ymd} 検証中...`;
+            let [prog, resData] = await Promise.all([ fetchJson(`https://boatraceopenapi.github.io/programs/v2/${yyyy}/${ymd}.json`), fetchJson(`https://boatraceopenapi.github.io/results/v3/${yyyy}/${ymd}.json`) ]);
+            
+            if(prog && resData) {
+                let resMap = {};
+                let resArray = Array.isArray(resData) ? resData : (resData.results || []);
+                resArray.forEach(r => {
+                    if(r.boats) {
+                        let sorted = r.boats.filter(b => b.racer_place_number >= 1 && b.racer_place_number <= 3).sort((a,b) => a.racer_place_number - b.racer_place_number);
+                        if(sorted.length >= 3) {
+                            let code = `${sorted[0].racer_boat_number}-${sorted[1].racer_boat_number}-${sorted[2].racer_boat_number}`;
+                            let amt = 0; try { let pay = r.payouts || r.returns || {}; let tri = pay.trifecta || pay.sanrentan || pay.top_3 || []; amt = parseInt((Array.isArray(tri) ? tri[0] : tri).amount || 0); } catch(e) {}
+                            resMap[`${r.race_stadium_number || r.stadium_number}-${r.race_number || r.number}`] = { code, amt };
+                        }
+                    }
+                });
+
+                let dayRank = prog.programs.map(r => {
+                    let p = calcScores(r.boats||[]);
+                    let rNum = r.race_number || r.number || "?";
+                    return { key: `${r.race_stadium_number}-${r.race_number}`, stadium: STADIUMS[r.race_stadium_number], num: rNum, boats: r.boats, prob: p.length ? (p[0].s*0.5+p[1].s*0.3+p[2].s*0.2) : 0, race_closed_at: r.race_closed_at };
+                }).sort((a,b) => b.prob - a.prob);
+
+                let dayGeki = "", dayAtsu = "";
+                dayRank.forEach((r, idx) => {
+                    let real = resMap[r.key]; if(!real) return;
+                    let p = calcScores(r.boats||[]);
+                    let cat = idx < 3 ? "geki" : (idx < 8 ? "atsu" : "other");
+                    
+                    counts.forEach(c => {
+                        let hit = generateBets(p, c).some(b => b.code === real.code);
+                        let update = (target) => { matrix[target][c].invest += 100 * c; if(hit) matrix[target][c].ret += real.amt; };
+                        update("all");
+                        update(cat);
+                    });
+
+                    let bets = generateBets(p, viewCount);
+                    let isHit = bets.some(b => b.code === real.code);
+                    let resBox = isHit ? `<div class="hit-box">的中！<br>¥${real.amt.toLocaleString()}</div>` : `<div class="miss-box"><span class="result-code">${real.code}</span>不的中</div>`;
+                    let box = renderRaceBox(r, r.stadium, idx < 3 ? "激アツ🔥" : (idx < 8 ? "アツ🔥" : ""), viewCount, resBox);
+                    if(idx < 3) dayGeki += box; else if(idx < 8) dayAtsu += box;
+                });
+                if(dayGeki || dayAtsu) {
+                    fullHtml += `<div style="padding:10px 5px; font-weight:bold; background:#eee; margin-top:10px; border-radius:5px; font-size:0.8rem;">🗓 ${ymd}</div>`;
+                    if(dayGeki) fullHtml += `<div class="card" style="border-left-color:var(--red);"><div style="color:var(--red);font-weight:bold;margin-bottom:5px;">🔥 激アツ</div><div class="race-grid">${dayGeki}</div></div>`;
+                    if(dayAtsu) fullHtml += `<div class="card" style="border-left-color:var(--orange);"><div style="color:var(--orange);font-weight:bold;margin-bottom:5px;">🔥 アツ</div><div class="race-grid">${dayAtsu}</div></div>`;
+                }
+            }
+            cDate.setDate(cDate.getDate() + 1);
+        }
+
+        let tableHtml = `<tr><th style="width:12%">点数</th><th>激アツ<br>回収/収支</th><th>アツ<br>回収/収支</th><th>それ以外<br>回収/収支</th><th>全体<br>回収/収支</th></tr>`;
+        counts.forEach(c => {
+            const getCell = (cat) => {
+                const s = matrix[cat][c];
+                if(!s.invest) return "0.0%<br>0円";
+                const rec = (s.ret/s.invest*100).toFixed(1);
+                const prof = s.ret - s.invest;
+                return `${rec}%<br><span class="${prof>=0?'val-plus':'val-minus'}">${prof.toLocaleString()}円</span>`;
+            };
+            tableHtml += `<tr><td>${c}点</td><td>${getCell("geki")}</td><td>${getCell("atsu")}</td><td>${getCell("other")}</td><td class="row-total">${getCell("all")}</td></tr>`;
+        });
+        matrixTable.innerHTML = tableHtml; sumArea.style.display = "block"; area.innerHTML = fullHtml; status.innerText = "✅ 検証完了";
+    }
+</script>
+</body>
+</html>
