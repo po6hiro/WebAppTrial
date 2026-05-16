@@ -5,53 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>当五郎</title>
     <style>
-        :root { --blue: #01579b; --gold: #ffc107; --bg: #f0f2f5; --red: #d32f2f; --green: #2e7d32; --orange: #f57c00; --dark: #333; }
+        /* ダークモード用のカラー変数に調整 */
+        :root { 
+            --blue: #29b6f6; /* 明るめのブルー（ダーク背景に映えるよう変更） */
+            --header-blue: #0d47a1; /* ヘッダー用の濃いブルー */
+            --gold: #ffd54f; /* 明るめのゴールド */
+            --bg: #121212; /* メイン背景（黒） */
+            --card-bg: #1e1e1e; /* カードの背景（濃いグレー） */
+            --box-bg: #2a2a2a; /* レースボックス等の背景 */
+            --red: #ff5252; /* 明るめの赤 */
+            --green: #69f0ae; /* ネオングリーン */
+            --orange: #ff9100; /* 明るめのオレンジ */
+            --dark: #e0e0e0; /* 基本の文字色（ライトグレー） */
+            --sub-text: #aaaaaa; /* 補足用の文字色 */
+        }
         body { font-family: sans-serif; background: var(--bg); margin: 0; color: var(--dark); padding-bottom: 30px; }
-        .header { background: var(--blue); color: white; padding: 10px 15px; text-align: center; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .header { background: var(--header-blue); color: white; padding: 10px 15px; text-align: center; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         .ver { position: absolute; top: 5px; right: 10px; font-size: 0.6rem; opacity: 0.7; }
         .container { padding: 5px; max-width: 600px; margin: auto; }
         
         .logic-wrap { margin: 10px 5px; }
-        .logic-btn-wide { width: 100%; background: white; color: var(--blue); border: 2px solid var(--blue); padding: 10px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .logic-desc { display: none; text-align: left; background: #fff; padding: 12px; border-radius: 8px; margin-top: 5px; font-size: 0.82rem; color: #444; border: 1px dashed var(--blue); line-height: 1.6; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        /* ボタン背景をダークに */
+        .logic-btn-wide { width: 100%; background: var(--card-bg); color: var(--blue); border: 2px solid var(--blue); padding: 10px; border-radius: 8px; font-weight: bold; font-size: 0.9rem; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+        .logic-desc { display: none; text-align: left; background: var(--card-bg); padding: 12px; border-radius: 8px; margin-top: 5px; font-size: 0.82rem; color: var(--dark); border: 1px dashed var(--blue); line-height: 1.6; box-shadow: 0 2px 4px rgba(0,0,0,0.3); }
         
         .tabs { display: flex; margin: 10px 5px; border-radius: 8px; overflow: hidden; border: 2px solid var(--blue); }
-        .tab { flex: 1; text-align: center; padding: 12px; background: white; color: var(--blue); font-weight: bold; cursor: pointer; font-size: 0.95rem; }
-        .tab.active { background: var(--blue); color: white; }
+        .tab { flex: 1; text-align: center; padding: 12px; background: var(--card-bg); color: var(--blue); font-weight: bold; cursor: pointer; font-size: 0.95rem; }
+        .tab.active { background: var(--blue); color: #121212; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        .section-box { background: white; padding: 15px; border-radius: 10px; margin: 10px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .section-box { background: var(--card-bg); padding: 15px; border-radius: 10px; margin: 10px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
         .setting-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; }
-        .setting-select { padding: 8px; border-radius: 5px; border: 2px solid var(--gold); font-weight: bold; font-size: 0.85rem; }
+        /* セレクトボックスをダークに */
+        .setting-select { padding: 8px; border-radius: 5px; border: 2px solid var(--gold); background: var(--box-bg); color: var(--dark); font-weight: bold; font-size: 0.85rem; }
         .date-row { display: flex; align-items: center; justify-content: center; gap: 5px; margin-bottom: 10px; }
-        .date-input { padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 0.9rem; width: 45%; text-align: center; }
+        /* 日付入力をダークに */
+        .date-input { padding: 8px; border-radius: 5px; border: 1px solid #444; background: var(--box-bg); color: var(--dark); font-size: 0.9rem; width: 45%; text-align: center; }
         
         .btn { width: 100%; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; padding: 12px 0; }
-        .btn-pred { background: var(--gold); color: #333; box-shadow: 0 4px 0 #d4a017; }
-        .btn-verify { background: #eceff1; color: var(--blue); box-shadow: 0 4px 0 #cfd8dc; border: 1px solid #cfd8dc; }
+        .btn-pred { background: var(--gold); color: #121212; box-shadow: 0 4px 0 #c7a530; }
+        .btn-verify { background: #37474f; color: var(--blue); box-shadow: 0 4px 0 #21272a; border: 1px solid #263238; }
         
-        .stats-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.65rem; background: white; table-layout: fixed; }
-        .stats-table th, .stats-table td { border: 1px solid #e0e0e0; padding: 6px 1px; text-align: center; overflow: hidden; }
-        .stats-table th { background: #f5f5f5; height: 30px; }
-        .row-total { background: #e3f2fd; font-weight: bold; }
+        /* テーブルをダークに */
+        .stats-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.65rem; background: var(--card-bg); table-layout: fixed; }
+        .stats-table th, .stats-table td { border: 1px solid #333; padding: 6px 1px; text-align: center; overflow: hidden; }
+        .stats-table th { background: #252525; height: 30px; color: var(--sub-text); }
+        .row-total { background: #1a237e; font-weight: bold; }
         .val-plus { color: var(--red); font-weight: bold; }
-        .val-minus { color: var(--blue); }
+        .val-minus { color: #64b5f6; }
 
-        .card { background: white; border-radius: 10px; padding: 10px; margin-bottom: 12px; border-left: 5px solid var(--blue); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .card-title { font-size: 1rem; font-weight: bold; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px solid #eee; }
+        .card { background: var(--card-bg); border-radius: 10px; padding: 10px; margin-bottom: 12px; border-left: 5px solid var(--blue); box-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+        .card-title { font-size: 1rem; font-weight: bold; margin-bottom: 8px; padding-bottom: 5px; border-bottom: 1px solid #333; }
         .race-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-        .race-box { background: #f8f9fa; border: 1px solid #eee; padding: 6px 4px; border-radius: 6px; display: flex; flex-direction: column; }
-        .race-header { text-align: center; border-bottom: 1px dashed #ccc; margin-bottom: 5px; padding-bottom: 3px; }
+        .race-box { background: var(--box-bg); border: 1px solid #333; padding: 6px 4px; border-radius: 6px; display: flex; flex-direction: column; }
+        .race-header { text-align: center; border-bottom: 1px dashed #444; margin-bottom: 5px; padding-bottom: 3px; }
         .race-name { font-weight: bold; font-size: 0.75rem; display: block; }
-        .race-time { font-size: 0.65rem; color: #666; }
+        .race-time { font-size: 0.65rem; color: var(--sub-text); }
         
         .pred-item { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px; }
         .pred-code { font-weight: bold; color: var(--red); font-size: 0.85rem; }
         .pred-exp { font-size: 0.55rem; color: var(--blue); white-space: nowrap; }
         
-        .hit-box { background: #e8f5e9; border: 1px dashed #4caf50; padding: 3px; margin-top: 4px; border-radius: 4px; text-align: center; color: var(--green); font-weight: bold; font-size: 0.7rem; }
-        .miss-box { background: #ffebee; border: 1px dashed #ef9a9a; padding: 3px; margin-top: 4px; border-radius: 4px; text-align: center; color: var(--red); font-size: 0.7rem; }
+        /* 的中・不的中ボックスの調整 */
+        .hit-box { background: #1b5e20; border: 1px dashed var(--green); padding: 3px; margin-top: 4px; border-radius: 4px; text-align: center; color: var(--green); font-weight: bold; font-size: 0.7rem; }
+        .miss-box { background: #b71c1c; border: 1px dashed var(--red); padding: 3px; margin-top: 4px; border-radius: 4px; text-align: center; color: #ffcdd2; font-size: 0.7rem; }
         .result-code { font-weight: bold; display: block; font-size: 0.8rem; }
     </style>
 </head>
@@ -112,7 +130,7 @@
         <div id="s-backtest" style="text-align:center; font-weight:bold; margin:15px; color:var(--blue);"></div>
         
         <div id="totalSummaryArea" style="display:none; margin: 0 5px;">
-            <div style="font-weight: bold; margin: 10px 0; font-size:0.85rem; border-left:4px solid var(--green); padding-left:5px;">📈 点数別 カテゴリ収支比較</div>
+            <div style="font-weight: bold; margin: 10px 0; font-size:0.85rem; border-left:4px solid var(--green); padding-left:5px; color:var(--green);">📈 点数別 カテゴリ収支比較</div>
             <table class="stats-table" id="matrixTable"></table>
         </div>
         <div id="area-backtest"></div>
@@ -228,7 +246,7 @@
                     if(idx < 3) dayGeki += box; else if(idx < 8) dayAtsu += box;
                 });
                 if(dayGeki || dayAtsu) {
-                    fullHtml += `<div style="padding:10px 5px; font-weight:bold; background:#eee; margin-top:10px; border-radius:5px; font-size:0.8rem;">🗓 ${ymd}</div>`;
+                    fullHtml += `<div style="padding:10px 5px; font-weight:bold; background:#252525; margin-top:10px; border-radius:5px; font-size:0.8rem; color:var(--blue);">🗓 ${ymd}</div>`;
                     if(dayGeki) fullHtml += `<div class="card" style="border-left-color:var(--red);"><div style="color:var(--red);font-weight:bold;margin-bottom:5px;">🔥 激アツ</div><div class="race-grid">${dayGeki}</div></div>`;
                     if(dayAtsu) fullHtml += `<div class="card" style="border-left-color:var(--orange);"><div style="color:var(--orange);font-weight:bold;margin-bottom:5px;">🔥 アツ</div><div class="race-grid">${dayAtsu}</div></div>`;
                 }
